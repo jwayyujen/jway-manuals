@@ -3,54 +3,77 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jway 產品說明書</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jway 暖時光｜產品說明書</title>
+
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  font-family: Arial, "Noto Sans TC", sans-serif;
+  background: #f5f6f6;
   color: #333;
 }
-header {
-  padding: 20px;
+
+.header {
+  background: #fff;
+  padding: 22px 16px;
   text-align: center;
-  background: white;
+  border-bottom: 1px solid #eee;
 }
-h2 { margin: 0 0 8px; }
-p { color: #777; font-size: 14px; }
-.download {
+
+.header h2 {
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+
+.header p {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 15px;
+}
+
+.download-btn {
   display: inline-block;
-  margin: 12px 0;
-  padding: 11px 24px;
-  background: #00a9a5;
-  color: white;
+  padding: 11px 26px;
+  background: #00aaa5;
+  color: #fff;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 5px;
+  font-size: 14px;
 }
-iframe {
-  display: block;
+
+.viewer {
   width: 100%;
-  height: 80vh;
-  border: 0;
-  background: white;
+  height: calc(100vh - 125px);
+  min-height: 500px;
+  border: none;
+  display: block;
 }
 </style>
 </head>
+
 <body>
 
-<header>
-  <h2>Jway 產品說明書</h2>
-  <p>暖時光｜瞬熱定時陶瓷電暖器</p>
-  <a class="download"
-     href="./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
-     download>
+<div class="header">
+  <h2>Jway 暖時光｜瞬熱定時陶瓷電暖器</h2>
+  <p>產品使用說明書</p>
+
+  <a
+    class="download-btn"
+    href="./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
+    download>
     下載產品說明書
   </a>
-</header>
+</div>
 
 <iframe
-  src="./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf">
+  class="viewer"
+  src="./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
+  title="暖時光產品說明書">
 </iframe>
 
 </body>
