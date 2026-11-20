@@ -29,7 +29,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
   padding: 10px;
   background: #fff;
   border-bottom: 1px solid #ddd;
@@ -38,35 +39,50 @@ html, body {
 .toolbar button {
   border: 0;
   background: #f1f1f1;
-  padding: 8px 13px;
+  padding: 9px 13px;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
+}
+
+.toolbar button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 #pageInfo {
   font-size: 13px;
   color: #555;
+  min-width: 55px;
+  text-align: center;
 }
 
 #viewer {
   padding: 12px 0;
+  min-height: 80vh;
 }
 
 .page {
   display: block;
-  margin: 0 auto 12px;
+  margin: 0 auto;
   max-width: 100%;
   height: auto;
   background: white;
   box-shadow: 0 1px 5px #bbb;
 }
 
+#status {
+  padding: 30px 15px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
 #error {
   display: none;
-  padding: 30px;
+  padding: 30px 15px;
   text-align: center;
-  color: #555;
+  color: #b00020;
 }
 </style>
 </head>
@@ -74,19 +90,20 @@ html, body {
 <body>
 
 <div class="toolbar">
-  <button id="prev">上一頁</button>
+  <button id="prev" disabled>上一頁</button>
   <span id="pageInfo">載入中...</span>
-  <button id="next">下一頁</button>
-  <button id="zoomOut">－</button>
-  <button id="zoomIn">＋</button>
+  <button id="next" disabled>下一頁</button>
+  <button id="zoomOut" disabled>－</button>
+  <button id="zoomIn" disabled>＋</button>
 </div>
 
+<div id="status">說明書載入中，請稍候...</div>
 <div id="viewer"></div>
 <div id="error">PDF 載入失敗，請稍後再試。</div>
 
 <script>
 const pdfUrl =
-  "./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf";
+  "https://jwayyujen.github.io/jway-manuals/JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -98,95 +115,127 @@ let rendering = false;
 
 const viewer = document.getElementById("viewer");
 const pageInfo = document.getElementById("pageInfo");
+const status = document.getElementById("status");
+
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+const zoomOutBtn = document.getElementById("zoomOut");
+const zoomInBtn = document.getElementById("zoomIn");
 
 async function renderPage() {
   if (!pdfDoc || rendering) return;
 
   rendering = true;
-  viewer.innerHTML = "";
 
-  const page = await pdfDoc.getPage(currentPage);
-  const baseViewport = page.getViewport({ scale: 1 });
+  try {
+    viewer.innerHTML = "";
 
-  const availableWidth = Math.max(
-    280,
-    Math.min(window.innerWidth - 20, 1100)
-  );
+    const page = await pdfDoc.getPage(currentPage);
+    const baseViewport = page.getViewport({ scale: 1 });
 
-  const scale = availableWidth / baseViewport.width * zoom;
-  const viewport = page.getViewport({ scale });
+    const availableWidth = Math.max(
+      280,
+      Math.min(window.innerWidth - 20, 1100)
+    );
 
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+    const scale = (availableWidth / baseViewport.width) * zoom;
+    const viewport = page.getViewport({ scale });
 
-  const ratio = window.devicePixelRatio || 1;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const ratio = window.devicePixelRatio || 1;
 
-  canvas.width = viewport.width * ratio;
-  canvas.height = viewport.height * ratio;
-  canvas.style.width = viewport.width + "px";
-  canvas.style.height = viewport.height + "px";
-  canvas.className = "page";
+    canvas.width = Math.floor(viewport.width * ratio);
+    canvas.height = Math.floor(viewport.height * ratio);
 
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    canvas.style.width = viewport.width + "px";
+    canvas.style.height = viewport.height + "px";
+    canvas.className = "page";
 
-  viewer.appendChild(canvas);
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-  await page.render({
-    canvasContext: context,
-    viewport: viewport
-  }).promise;
+    viewer.appendChild(canvas);
 
-  pageInfo.textContent =
-    currentPage + " / " + pdfDoc.numPages;
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
 
-  document.getElementById("prev").disabled =
-    currentPage <= 1;
+    pageInfo.textContent =
+      currentPage + " / " + pdfDoc.numPages;
 
-  document.getElementById("next").disabled =
-    currentPage >= pdfDoc.numPages;
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= pdfDoc.numPages;
 
-  rendering = false;
+    zoomOutBtn.disabled = zoom <= 0.6;
+    zoomInBtn.disabled = zoom >= 2.5;
+
+  } catch (error) {
+    console.error("PDF 頁面顯示失敗：", error);
+    document.getElementById("error").style.display = "block";
+
+  } finally {
+    rendering = false;
+  }
 }
 
-document.getElementById("prev").onclick = () => {
+prevBtn.onclick = () => {
   if (currentPage > 1 && !rendering) {
     currentPage--;
     renderPage();
   }
 };
 
-document.getElementById("next").onclick = () => {
+nextBtn.onclick = () => {
   if (pdfDoc && currentPage < pdfDoc.numPages && !rendering) {
     currentPage++;
     renderPage();
   }
 };
 
-document.getElementById("zoomIn").onclick = () => {
+zoomInBtn.onclick = () => {
   if (!rendering && zoom < 2.5) {
-    zoom += 0.2;
+    zoom = Math.min(2.5, zoom + 0.2);
     renderPage();
   }
 };
 
-document.getElementById("zoomOut").onclick = () => {
+zoomOutBtn.onclick = () => {
   if (!rendering && zoom > 0.6) {
-    zoom -= 0.2;
+    zoom = Math.max(0.6, zoom - 0.2);
     renderPage();
   }
 };
+
+let resizeTimer;
 
 window.addEventListener("resize", () => {
-  if (pdfDoc && !rendering) renderPage();
+  clearTimeout(resizeTimer);
+
+  resizeTimer = setTimeout(() => {
+    if (pdfDoc && !rendering) {
+      renderPage();
+    }
+  }, 200);
 });
 
 pdfjsLib.getDocument(pdfUrl).promise
   .then(pdf => {
     pdfDoc = pdf;
+
+    status.style.display = "none";
+
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
+    zoomOutBtn.disabled = false;
+    zoomInBtn.disabled = false;
+
     renderPage();
   })
   .catch(error => {
-    console.error(error);
+    console.error("PDF 載入失敗：", error);
+
+    status.style.display = "none";
     document.getElementById("error").style.display = "block";
     pageInfo.textContent = "載入失敗";
   });
