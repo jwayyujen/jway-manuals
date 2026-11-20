@@ -57,6 +57,16 @@ html, body {
   text-align: center;
 }
 
+#download {
+  display: inline-block;
+  background: #0d9488;
+  color: white;
+  padding: 9px 13px;
+  border-radius: 5px;
+  font-size: 15px;
+  text-decoration: none;
+}
+
 #viewer {
   padding: 12px 0;
   min-height: 80vh;
@@ -84,6 +94,19 @@ html, body {
   text-align: center;
   color: #b00020;
 }
+
+@media (max-width: 480px) {
+  .toolbar {
+    gap: 7px;
+    padding: 8px 5px;
+  }
+
+  .toolbar button,
+  #download {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
 </style>
 </head>
 
@@ -95,6 +118,14 @@ html, body {
   <button id="next" disabled>下一頁</button>
   <button id="zoomOut" disabled>－</button>
   <button id="zoomIn" disabled>＋</button>
+
+  <a
+    id="download"
+    href="https://jwayyujen.github.io/jway-manuals/JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
+    download="Jway-暖時光-產品說明書.pdf"
+  >
+    ↓ 下載 PDF
+  </a>
 </div>
 
 <div id="status">說明書載入中，請稍候...</div>
