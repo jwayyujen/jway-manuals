@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title></title>
+<title>Jway 暖時光｜產品說明書</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -142,7 +142,6 @@ html, body {
 <div class="toolbar">
 
   <button id="prev" disabled>上一頁</button>
-
   <span id="pageInfo">載入中...</span>
 
   <button id="next" disabled>下一頁</button>
@@ -192,7 +191,6 @@ const zoomInBtn = document.getElementById("zoomIn");
 
 /* 顯示 PDF 頁面 */
 async function renderPage() {
-
   if (!pdfDoc || rendering) return;
 
   rendering = true;
@@ -220,7 +218,6 @@ async function renderPage() {
     });
 
     const canvas = document.createElement("canvas");
-
     const context = canvas.getContext("2d");
 
     const ratio = window.devicePixelRatio || 1;
@@ -266,7 +263,6 @@ async function renderPage() {
       "block";
 
   } finally {
-
     rendering = false;
 
   }
@@ -317,7 +313,6 @@ zoomInBtn.onclick = () => {
 
 /* 縮小 */
 zoomOutBtn.onclick = () => {
-
   if (!rendering && zoom > 0.6) {
 
     zoom = Math.max(0.6, zoom - 0.2);
@@ -359,7 +354,6 @@ pdfjsLib.getDocument(pdfUrl).promise
     prevBtn.disabled = false;
 
     nextBtn.disabled = false;
-
     zoomOutBtn.disabled = false;
 
     zoomInBtn.disabled = false;
