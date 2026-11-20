@@ -22,6 +22,7 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
+/* 翻頁與縮放工具列 */
 .toolbar {
   position: sticky;
   top: 0;
@@ -57,16 +58,34 @@ html, body {
   text-align: center;
 }
 
-#download {
-  display: inline-block;
-  background: #0d9488;
-  color: white;
-  padding: 9px 13px;
-  border-radius: 5px;
-  font-size: 15px;
-  text-decoration: none;
+/* 獨立下載按鈕 */
+.download-area {
+  display: flex;
+  justify-content: center;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
 }
 
+#download {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  min-height: 42px;
+  padding: 12px;
+  background: #0d9488 !important;
+  color: #fff !important;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none !important;
+  position: relative;
+  z-index: 20;
+}
+
+/* PDF 預覽區 */
 #viewer {
   padding: 12px 0;
   min-height: 80vh;
@@ -95,16 +114,30 @@ html, body {
   color: #b00020;
 }
 
+/* 手機版 */
 @media (max-width: 480px) {
   .toolbar {
     gap: 7px;
     padding: 8px 5px;
   }
 
-  .toolbar button,
-  #download {
-    padding: 8px 10px;
+  .toolbar button {
+    padding: 9px 10px;
     font-size: 13px;
+  }
+
+  #pageInfo {
+    font-size: 12px;
+    min-width: 45px;
+  }
+
+  .download-area {
+    padding: 9px 12px;
+  }
+
+  #download {
+    font-size: 14px;
+    min-height: 44px;
   }
 }
 </style>
@@ -112,19 +145,23 @@ html, body {
 
 <body>
 
+<!-- 翻頁與縮放 -->
 <div class="toolbar">
   <button id="prev" disabled>上一頁</button>
   <span id="pageInfo">載入中...</span>
   <button id="next" disabled>下一頁</button>
   <button id="zoomOut" disabled>－</button>
   <button id="zoomIn" disabled>＋</button>
+</div>
 
+<!-- 獨立下載區 -->
+<div class="download-area">
   <a
     id="download"
     href="https://jwayyujen.github.io/jway-manuals/JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
     download="Jway-暖時光-產品說明書.pdf"
   >
-    ↓ 下載 PDF
+    ↓ 下載產品說明書
   </a>
 </div>
 
@@ -210,6 +247,7 @@ async function renderPage() {
   }
 }
 
+/* 上一頁 */
 prevBtn.onclick = () => {
   if (currentPage > 1 && !rendering) {
     currentPage--;
@@ -217,6 +255,7 @@ prevBtn.onclick = () => {
   }
 };
 
+/* 下一頁 */
 nextBtn.onclick = () => {
   if (pdfDoc && currentPage < pdfDoc.numPages && !rendering) {
     currentPage++;
@@ -224,6 +263,7 @@ nextBtn.onclick = () => {
   }
 };
 
+/* 放大 */
 zoomInBtn.onclick = () => {
   if (!rendering && zoom < 2.5) {
     zoom = Math.min(2.5, zoom + 0.2);
@@ -231,6 +271,7 @@ zoomInBtn.onclick = () => {
   }
 };
 
+/* 縮小 */
 zoomOutBtn.onclick = () => {
   if (!rendering && zoom > 0.6) {
     zoom = Math.max(0.6, zoom - 0.2);
@@ -238,6 +279,7 @@ zoomOutBtn.onclick = () => {
   }
 };
 
+/* 螢幕尺寸改變時重新調整 */
 let resizeTimer;
 
 window.addEventListener("resize", () => {
@@ -250,6 +292,7 @@ window.addEventListener("resize", () => {
   }, 200);
 });
 
+/* 載入 PDF */
 pdfjsLib.getDocument(pdfUrl).promise
   .then(pdf => {
     pdfDoc = pdf;
