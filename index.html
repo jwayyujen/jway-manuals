@@ -5,25 +5,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title></title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 <style>
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  background: #e9e9e9;
+  font-family: Arial, sans-serif;
 }
-iframe {
-  width: 100%;
-  height: 100%;
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.toolbar button {
   border: 0;
+  background: #f1f1f1;
+  padding: 8px 13px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#pageInfo {
+  font-size: 13px;
+  color: #555;
+}
+
+#viewer {
+  padding: 12px 0;
+}
+
+.page {
   display: block;
+  margin: 0 auto 12px;
+  max-width: 100%;
+  height: auto;
+  background: white;
+  box-shadow: 0 1px 5px #bbb;
+}
+
+#error {
+  display: none;
+  padding: 30px;
+  text-align: center;
+  color: #555;
 }
 </style>
 </head>
+
 <body>
-<iframe
-  src="./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf">
-</iframe>
+
+<div class="toolbar">
+  <button id="prev">上一頁</button>
+  <span id="pageInfo">載入中...</span>
+  <button id="next">下一頁</button>
+  <button id="zoomOut">－</button>
+  <button id="zoomIn">＋</button>
+</div>
+
+<div id="viewer"></div>
+<div id="error">PDF 載入失敗，請稍後再試。</div>
+
+<script>
+const pdfUrl =
+  "./JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+let pdfDoc = null;
+let currentPage = 1;
+let zoom = 1;
+let rendering = false;
+
+const viewer = document.getElementById("viewer");
+const pageInfo = document.getElementById("pageInfo");
+
+async function renderPage() {
+  if (!pdfDoc || rendering) return;
+
+  rendering = true;
+  viewer.innerHTML = "";
+
+  const page = await pdfDoc.getPage(currentPage);
+  const baseViewport = page.getViewport({ scale: 1 });
+
+  const availableWidth = Math.max(
+    280,
+    Math.min(window.innerWidth - 20, 1100)
+  );
+
+  const scale = availableWidth / baseViewport.width * zoom;
+  const viewport = page.getViewport({ scale });
+
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  const ratio = window.devicePixelRatio || 1;
+
+  canvas.width = viewport.width * ratio;
+  canvas.height = viewport.height * ratio;
+  canvas.style.width = viewport.width + "px";
+  canvas.style.height = viewport.height + "px";
+  canvas.className = "page";
+
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+  viewer.appendChild(canvas);
+
+  await page.render({
+    canvasContext: context,
+    viewport: viewport
+  }).promise;
+
+  pageInfo.textContent =
+    currentPage + " / " + pdfDoc.numPages;
+
+  document.getElementById("prev").disabled =
+    currentPage <= 1;
+
+  document.getElementById("next").disabled =
+    currentPage >= pdfDoc.numPages;
+
+  rendering = false;
+}
+
+document.getElementById("prev").onclick = () => {
+  if (currentPage > 1 && !rendering) {
+    currentPage--;
+    renderPage();
+  }
+};
+
+document.getElementById("next").onclick = () => {
+  if (pdfDoc && currentPage < pdfDoc.numPages && !rendering) {
+    currentPage++;
+    renderPage();
+  }
+};
+
+document.getElementById("zoomIn").onclick = () => {
+  if (!rendering && zoom < 2.5) {
+    zoom += 0.2;
+    renderPage();
+  }
+};
+
+document.getElementById("zoomOut").onclick = () => {
+  if (!rendering && zoom > 0.6) {
+    zoom -= 0.2;
+    renderPage();
+  }
+};
+
+window.addEventListener("resize", () => {
+  if (pdfDoc && !rendering) renderPage();
+});
+
+pdfjsLib.getDocument(pdfUrl).promise
+  .then(pdf => {
+    pdfDoc = pdf;
+    renderPage();
+  })
+  .catch(error => {
+    console.error(error);
+    document.getElementById("error").style.display = "block";
+    pageInfo.textContent = "載入失敗";
+  });
+</script>
+
 </body>
 </html>
