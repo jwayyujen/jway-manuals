@@ -22,7 +22,7 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* 翻頁與縮放工具列 */
+/* 工具列：所有按鈕同一行 */
 .toolbar {
   position: sticky;
   top: 0;
@@ -30,20 +30,22 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px;
+  flex-wrap: nowrap;
+  gap: 5px;
+  padding: 8px 4px;
   background: #fff;
   border-bottom: 1px solid #ddd;
 }
 
 .toolbar button {
+  flex-shrink: 0;
   border: 0;
   background: #f1f1f1;
-  padding: 9px 13px;
-  border-radius: 5px;
-  font-size: 15px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .toolbar button:disabled {
@@ -51,38 +53,32 @@ html, body {
   cursor: default;
 }
 
+/* 頁數 */
 #pageInfo {
-  font-size: 13px;
+  flex-shrink: 0;
+  font-size: 11px;
   color: #555;
-  min-width: 55px;
+  min-width: 35px;
   text-align: center;
+  white-space: nowrap;
 }
 
-/* 獨立下載按鈕 */
-.download-area {
-  display: flex;
-  justify-content: center;
-  padding: 10px 12px;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
-}
-
+/* 下載箭頭 */
 #download {
-  display: flex !important;
+  display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  max-width: 400px;
-  min-height: 42px;
-  padding: 12px;
-  background: #0d9488 !important;
-  color: #fff !important;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  text-decoration: none !important;
-  position: relative;
-  z-index: 20;
+  width: 32px;
+  height: 32px;
+  background: #0d9488;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 23px;
+  font-weight: bold;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* PDF 預覽區 */
@@ -93,7 +89,7 @@ html, body {
 
 .page {
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 12px;
   max-width: 100%;
   height: auto;
   background: white;
@@ -117,27 +113,24 @@ html, body {
 /* 手機版 */
 @media (max-width: 480px) {
   .toolbar {
-    gap: 7px;
-    padding: 8px 5px;
+    gap: 4px;
+    padding: 7px 3px;
   }
 
   .toolbar button {
-    padding: 9px 10px;
-    font-size: 13px;
+    padding: 5px 6px;
+    font-size: 11px;
   }
 
   #pageInfo {
-    font-size: 12px;
-    min-width: 45px;
-  }
-
-  .download-area {
-    padding: 9px 12px;
+    min-width: 32px;
+    font-size: 10px;
   }
 
   #download {
-    font-size: 14px;
-    min-height: 44px;
+    width: 30px;
+    height: 30px;
+    font-size: 21px;
   }
 }
 </style>
@@ -145,31 +138,38 @@ html, body {
 
 <body>
 
-<!-- 翻頁與縮放 -->
+<!-- 工具列 -->
 <div class="toolbar">
-  <button id="prev" disabled>上一頁</button>
-  <span id="pageInfo">載入中...</span>
-  <button id="next" disabled>下一頁</button>
-  <button id="zoomOut" disabled>－</button>
-  <button id="zoomIn" disabled>＋</button>
-</div>
 
-<!-- 獨立下載區 -->
-<div class="download-area">
+  <button id="prev" disabled>上一頁</button>
+
+  <span id="pageInfo">載入中...</span>
+
+  <button id="next" disabled>下一頁</button>
+
+  <button id="zoomOut" disabled>－</button>
+
+  <button id="zoomIn" disabled>＋</button>
+
   <a
     id="download"
     href="https://jwayyujen.github.io/jway-manuals/JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf"
     download="Jway-暖時光-產品說明書.pdf"
-  >
-    ↓ 下載產品說明書
-  </a>
+    aria-label="下載產品說明書"
+    title="下載產品說明書"
+  >↓</a>
+
 </div>
 
 <div id="status">說明書載入中，請稍候...</div>
+
 <div id="viewer"></div>
+
 <div id="error">PDF 載入失敗，請稍後再試。</div>
 
 <script>
+
+/* PDF 檔案網址 */
 const pdfUrl =
   "https://jwayyujen.github.io/jway-manuals/JY-CH605%E6%9A%96%E6%99%82%E5%85%89%EF%BD%9C%E7%9E%AC%E7%86%B1%E5%AE%9A%E6%99%82%E9%99%B6%E7%93%B7%E9%9B%BB%E6%9A%96%E5%99%A8-%E5%AE%98%E7%B6%B2%E7%94%A8-1022.pdf";
 
@@ -190,37 +190,54 @@ const nextBtn = document.getElementById("next");
 const zoomOutBtn = document.getElementById("zoomOut");
 const zoomInBtn = document.getElementById("zoomIn");
 
+/* 顯示 PDF 頁面 */
 async function renderPage() {
+
   if (!pdfDoc || rendering) return;
 
   rendering = true;
 
   try {
+
     viewer.innerHTML = "";
 
     const page = await pdfDoc.getPage(currentPage);
-    const baseViewport = page.getViewport({ scale: 1 });
+
+    const baseViewport = page.getViewport({
+      scale: 1
+    });
 
     const availableWidth = Math.max(
       280,
       Math.min(window.innerWidth - 20, 1100)
     );
 
-    const scale = (availableWidth / baseViewport.width) * zoom;
-    const viewport = page.getViewport({ scale });
+    const scale =
+      (availableWidth / baseViewport.width) * zoom;
+
+    const viewport = page.getViewport({
+      scale: scale
+    });
 
     const canvas = document.createElement("canvas");
+
     const context = canvas.getContext("2d");
+
     const ratio = window.devicePixelRatio || 1;
 
     canvas.width = Math.floor(viewport.width * ratio);
+
     canvas.height = Math.floor(viewport.height * ratio);
 
     canvas.style.width = viewport.width + "px";
+
     canvas.style.height = viewport.height + "px";
+
     canvas.className = "page";
 
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.setTransform(
+      ratio, 0, 0, ratio, 0, 0
+    );
 
     viewer.appendChild(canvas);
 
@@ -233,86 +250,137 @@ async function renderPage() {
       currentPage + " / " + pdfDoc.numPages;
 
     prevBtn.disabled = currentPage <= 1;
-    nextBtn.disabled = currentPage >= pdfDoc.numPages;
+
+    nextBtn.disabled =
+      currentPage >= pdfDoc.numPages;
 
     zoomOutBtn.disabled = zoom <= 0.6;
+
     zoomInBtn.disabled = zoom >= 2.5;
 
   } catch (error) {
+
     console.error("PDF 頁面顯示失敗：", error);
-    document.getElementById("error").style.display = "block";
+
+    document.getElementById("error").style.display =
+      "block";
 
   } finally {
+
     rendering = false;
+
   }
 }
 
 /* 上一頁 */
 prevBtn.onclick = () => {
+
   if (currentPage > 1 && !rendering) {
+
     currentPage--;
+
     renderPage();
+
   }
+
 };
 
 /* 下一頁 */
 nextBtn.onclick = () => {
-  if (pdfDoc && currentPage < pdfDoc.numPages && !rendering) {
+
+  if (
+    pdfDoc &&
+    currentPage < pdfDoc.numPages &&
+    !rendering
+  ) {
+
     currentPage++;
+
     renderPage();
+
   }
+
 };
 
 /* 放大 */
 zoomInBtn.onclick = () => {
+
   if (!rendering && zoom < 2.5) {
+
     zoom = Math.min(2.5, zoom + 0.2);
+
     renderPage();
+
   }
+
 };
 
 /* 縮小 */
 zoomOutBtn.onclick = () => {
+
   if (!rendering && zoom > 0.6) {
+
     zoom = Math.max(0.6, zoom - 0.2);
+
     renderPage();
+
   }
+
 };
 
-/* 螢幕尺寸改變時重新調整 */
+/* 螢幕尺寸變更 */
 let resizeTimer;
 
 window.addEventListener("resize", () => {
+
   clearTimeout(resizeTimer);
 
   resizeTimer = setTimeout(() => {
+
     if (pdfDoc && !rendering) {
+
       renderPage();
+
     }
+
   }, 200);
+
 });
 
 /* 載入 PDF */
 pdfjsLib.getDocument(pdfUrl).promise
+
   .then(pdf => {
+
     pdfDoc = pdf;
 
     status.style.display = "none";
 
     prevBtn.disabled = false;
+
     nextBtn.disabled = false;
+
     zoomOutBtn.disabled = false;
+
     zoomInBtn.disabled = false;
 
     renderPage();
+
   })
+
   .catch(error => {
+
     console.error("PDF 載入失敗：", error);
 
     status.style.display = "none";
-    document.getElementById("error").style.display = "block";
+
+    document.getElementById("error").style.display =
+      "block";
+
     pageInfo.textContent = "載入失敗";
+
   });
+
 </script>
 
 </body>
